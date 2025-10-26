@@ -45,13 +45,18 @@ fn main() -> ! {
     let mut adc1_ch15_pc5 = gpioc.pc5.into_analog(&mut gpioc.crl);
 
     // 配置四个拨码开关为推挽输入
-    let switch1 = gpioa.pa8.into_pull_up_input(&mut gpioa.crh);
-    let switch2 = gpioc.pc9.into_pull_up_input(&mut gpioc.crh);
-    let switch3 = gpioc.pc8.into_pull_up_input(&mut gpioc.crh);
-    let switch4 = gpioc.pc7.into_pull_up_input(&mut gpioc.crl);
+    let _switch1 = gpioa.pa8.into_pull_up_input(&mut gpioa.crh);
+    let _switch2 = gpioc.pc9.into_pull_up_input(&mut gpioc.crh);
+    let _switch3 = gpioc.pc8.into_pull_up_input(&mut gpioc.crh);
+    let _switch4 = gpioc.pc7.into_pull_up_input(&mut gpioc.crl);
 
     // 配置四个 LED 灯的引脚为推挽输出
+    /* 这里的 PA15 和 PB3 并没有配置为推挽输出的方法
+     * 想要使用的话需要把 JTAG 功能释放出来
+     * 再 TODO)) 通过寄存器方式来访问相应的引脚
+     */
     let mut led1_pa11 = gpioa.pa11.into_push_pull_output(&mut gpioa.crh);
+    // let mut led2_pa15 = gpioa.pa15.into_push_pull_output(&mut gpioa.crh);
     let mut led3_pc12 = gpioc.pc12.into_push_pull_output(&mut gpioc.crh);
     // let mut led4_pb3 = gpiob.pb3.into_push_pull_output(&mut gpiob.crl);
 
@@ -151,7 +156,30 @@ fn main() -> ! {
         wheels_pwm.set_duty(Channel::C1, (wheel_right_pwm / 4800) * wheels_pwm.get_max_duty());
 
         // 通过拨码开关调整板子上 LED 灯的亮灭
-
+        if _switch1.is_low() {
+            led1_pa11.set_high();
+        } else {
+            led1_pa11.set_low();
+        }
+        /*
+        if _switch2.is_low() {
+            led2_pa15.set_high();
+        } else {
+            led2_pa15.set_low();
+        }
+        */
+        if _switch3.is_low() {
+            led3_pc12.set_high();
+        } else {
+            led3_pc12.set_low();
+        }
+        /*
+        if _switch4.is_low() {
+            led4_pb3.set_high();
+        } else {
+            led4_pb3.set_low();
+        }
+        */
 
         // 延时 5 毫秒
         delay.delay_ms(5_u32);
