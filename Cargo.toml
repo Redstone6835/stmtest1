@@ -1,0 +1,30 @@
+[package]
+name = "stmtest1"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+embedded-hal = "1.0.0"
+panic-halt = "1.0.0"
+
+stm32f1xx-hal = { version = "0.10.0", features = ["stm32f103", "rt"] }
+
+[profile.dev]
+split-debuginfo = "packed"
+opt-level = "z"
+lto = true
+codegen-units = 1
+debug = 1
+strip = "debuginfo"
+panic = "abort"
+
+[profile.release]
+split-debuginfo = "packed"
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true
+debug = false
+panic = "abort"

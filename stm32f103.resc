@@ -1,0 +1,20 @@
+using sysbus
+mach create "stm32f103"
+
+machine LoadPlatformDescription @platforms/cpus/stm32f103.repl
+
+# 创建一个 LED 外设
+led: LED @ sysbus 0x0
+led Inverted true   # 因为 PC13 低电平点亮
+
+# 将 LED 连接到 GPIOC 的第13号引脚
+connector Connect sysbus.gpioPortC@13 led@0
+
+# 可选：打开 LED 状态可视化
+showAnalyzer led
+
+# 加载程序
+sysbus LoadELF @target/thumbv7m-none-eabi/release/stmtest1.elf
+
+# 启动仿真
+start
