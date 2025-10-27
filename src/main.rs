@@ -6,7 +6,7 @@ mod utils;
 
 use cortex_m_rt::entry;
 use panic_halt as _;
-use stm32f1xx_hal::{adc, gpio::{self, PA15}, pac, prelude::*, timer::{Channel, Tim3NoRemap, Tim4NoRemap}};
+use stm32f1xx_hal::{adc, pac, prelude::*, timer::{Channel, Tim3NoRemap, Tim4NoRemap}};
 
 use crate::utils::data_limit;
 
@@ -75,9 +75,9 @@ fn main() -> ! {
         &mut rcc
     );
     // 设置占空比为 舵机 PWM 中值
-    steer_pwm.set_duty(Channel::C1, steer_pwm_duty_center);
+    steer_pwm.set_duty(Channel::C3, steer_pwm_duty_center);
     // 使能舵机 PWM 输出
-    steer_pwm.enable(Channel::C1);
+    steer_pwm.enable(Channel::C3);
 
     // 配置左右轮控制流输出
     let mut left_wheel_pb8 = gpiob.pb8.into_push_pull_output(&mut gpiob.crh);
