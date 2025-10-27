@@ -1,29 +1,4 @@
-
-fn quicksort(arr: &mut [i32]) {
-    let len = arr.len();
-    if len <= 1 {
-        return;
-    }
-    
-    let pivot = arr[len - 1];
-    let mut i = 0;
-    
-    for j in 0..len - 1 {
-        if arr[j] <= pivot {
-            arr.swap(i, j);
-            i += 1;
-        }
-    }
-    
-    arr.swap(i, len - 1);
-    
-    if i > 0 {
-        quicksort(&mut arr[0..i]);
-    }
-    if i + 1 < len {
-        quicksort(&mut arr[i+1..]);
-    }
-}
+use crate::utils::quicksort;
 
 pub fn gauss_filter(x: &[i32], n: usize) -> f64 {
     if n <= 0 {
@@ -109,5 +84,3 @@ pub fn gauss_filter(x: &[i32], n: usize) -> f64 {
 
     return mu;
 }
-
-// 快速排序实现
