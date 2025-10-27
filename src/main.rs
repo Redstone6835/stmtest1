@@ -6,7 +6,7 @@ mod utils;
 
 use cortex_m_rt::entry;
 use panic_halt as _;
-use stm32f1xx_hal::{adc, pac, prelude::*, timer::{Channel, Tim3NoRemap, Tim4NoRemap}};
+use stm32f1xx_hal::{adc, gpio::{self, PA15}, pac, prelude::*, timer::{Channel, Tim3NoRemap, Tim4NoRemap}};
 
 use crate::utils::data_limit;
 
@@ -37,9 +37,8 @@ fn main() -> ! {
 
 
     // Release PB3 from JTAG to use it as GPIO
-    afio.mapr.disable_jtag(gpioa.pa15, gpiob.pb3, gpiob.pb4);
-
-    // 将 PA4 和 PC5 配置为模拟输入
+    let (pa15_released, pb3_released, pb4_released) =
+        afio.mapr.disable_jtag(gpioa.pa15, gpiob.pb3, gpiob.pb4);
     let mut adc1 = adc::Adc::new(dp.ADC1, &mut rcc);
     let mut adc1_ch4_pa4 = gpioa.pa4.into_analog(&mut gpioa.crl);
     let mut adc1_ch15_pc5 = gpioc.pc5.into_analog(&mut gpioc.crl);
@@ -54,11 +53,12 @@ fn main() -> ! {
     /* 这里的 PA15 和 PB3 并没有配置为推挽输出的方法
      * 想要使用的话需要把 JTAG 功能释放出来
      * 再 TODO)) 通过寄存器方式来访问相应的引脚
+     * SOLVED)) 通过 stm32f1xx-hal 提供的 disable_jtag 方法释放
      */
     let mut led1_pa11 = gpioa.pa11.into_push_pull_output(&mut gpioa.crh);
-    // let mut led2_pa15 = gpioa.pa15.into_push_pull_output(&mut gpioa.crh);
+    let mut led2_pa15 = pa15_released.into_push_pull_output(&mut gpioa.crh);
     let mut led3_pc12 = gpioc.pc12.into_push_pull_output(&mut gpioc.crh);
-    // let mut led4_pb3 = gpiob.pb3.into_push_pull_output(&mut gpiob.crl);
+    let mut led4_pb3 = pb3_released.into_push_pull_output(&mut gpiob.crl);
 
     // 配置使能开关为推挽输入
     let enable_switch_pa12 = gpioa.pa12.into_pull_up_input(&mut gpioa.crh);
@@ -161,25 +161,21 @@ fn main() -> ! {
         } else {
             led1_pa11.set_low();
         }
-        /*
         if _switch2.is_low() {
             led2_pa15.set_high();
         } else {
             led2_pa15.set_low();
         }
-        */
         if _switch3.is_low() {
             led3_pc12.set_high();
         } else {
             led3_pc12.set_low();
         }
-        /*
         if _switch4.is_low() {
             led4_pb3.set_high();
         } else {
             led4_pb3.set_low();
         }
-        */
 
         // 延时 5 毫秒
         delay.delay_ms(5_u32);
