@@ -73,7 +73,7 @@ fn main() -> ! {
         &mut rcc
     );
     // 设置占空比为 舵机 PWM 中值
-    steer_pwm.set_duty(Channel::C3, steer_pwm_duty_center);
+    steer_pwm.set_duty(Channel::C3, (steer_pwm_duty_center / 9999) * steer_pwm.get_max_duty());
     // 使能舵机 PWM 输出
     steer_pwm.enable(Channel::C3);
 
@@ -111,11 +111,11 @@ fn main() -> ! {
 
         let diff = (filtered_right - filtered_left) as i32;
         let steer_pwm_diff = 
-        data_limit(diff as f64 * 0.3, steer_pwm_duty_min as f64, steer_pwm_duty_max as f64) as i32;
-        let steer_pwm_duty = steer_pwm_duty_center as i32 - steer_pwm_diff; 
+        data_limit(diff as f64 * 0.3, steer_pwm_duty_min as f64, steer_pwm_duty_max as f64) as u16;
+        let steer_pwm_duty: u16 = steer_pwm_duty_center - steer_pwm_diff; 
 
         // 设置舵机 PWM 占空比
-        steer_pwm.set_duty(Channel::C1, steer_pwm_duty as u16);
+        steer_pwm.set_duty(Channel::C3, (steer_pwm_duty / 9999) * steer_pwm.get_max_duty());
 
         let mut wheel_speed_left = 0;
         let mut wheel_speed_right = 0;
