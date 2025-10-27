@@ -34,8 +34,6 @@ fn main() -> ! {
     let mut gpiob = dp.GPIOB.split(&mut rcc);
     let mut gpioc = dp.GPIOC.split(&mut rcc);
 
-
-
     // Release PB3 from JTAG to use it as GPIO
     let (pa15_released, pb3_released, pb4_released) =
         afio.mapr.disable_jtag(gpioa.pa15, gpiob.pb3, gpiob.pb4);
@@ -100,17 +98,12 @@ fn main() -> ! {
     let mut adc_value_left_buffer = [0i32; 16];
 
     loop {
-        // 读取 ADC 值
-        let adc_value_right_v: i32 = adc1.read(&mut adc1_ch4_pa4).unwrap();
-        let adc_value_left_v: i32 = adc1.read(&mut adc1_ch15_pc5).unwrap();
-
-        // ADC 值入缓冲区
+        // 读取 ADC 值入缓冲区
         for i in (1..16).rev() {
-            adc_value_right_buffer[i] = adc_value_right_buffer[i - 1];
-            adc_value_left_buffer[i] = adc_value_left_buffer[i - 1];
+            adc_value_right_buffer[i] = adc1.read(&mut adc1_ch4_pa4).unwrap();
+            adc_value_left_buffer[i] = adc1.read(&mut adc1_ch15_pc5).unwrap();
+            delay.delay_us(250_u32);
         }
-        adc_value_right_buffer[0] = adc_value_right_v;
-        adc_value_left_buffer[0] = adc_value_left_v;
 
         // 计算高斯滤波后的值
         let filtered_right = gauss::gauss_filter(&adc_value_right_buffer, 16);
@@ -176,8 +169,5 @@ fn main() -> ! {
         } else {
             led4_pb3.set_low();
         }
-
-        // 延时 5 毫秒
-        delay.delay_ms(5_u32);
     }
 }
